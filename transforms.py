@@ -5,7 +5,7 @@ import numpy as np
 
 def image_transforms(
     mode="train",
-    augment_parameters=[0.8, 1.2, 0.5, 2.0, 0.8, 1.2],
+    augment_parameters=(0.8, 1.2, 0.5, 2.0, 0.8, 1.2),
     do_augmentation=True,
     transformations=None,
     size=(256, 512),
