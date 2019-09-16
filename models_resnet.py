@@ -55,22 +55,19 @@ class resconv(nn.Module):
         self.conv3 = nn.Conv2d(
             num_out_layers, 4 * num_out_layers, kernel_size=1, stride=1
         )
-        self.conv4 = nn.Conv2d(
-            num_in_layers, 4 * num_out_layers, kernel_size=1, stride=stride
-        )
+        if num_out_layers != num_in_layers or stride != 1:
+            self.conv4 = nn.Conv2d(
+                num_in_layers, 4 * num_out_layers, kernel_size=1, stride=stride
+            )
+        else:
+            self.conv4 = lambda x: x
         self.normalize = nn.BatchNorm2d(4 * num_out_layers)
 
     def forward(self, x):
-        # do_proj = x.size()[1] != self.num_out_layers or self.stride == 2
-        do_proj = True
-        shortcut = []
         x_out = self.conv1(x)
         x_out = self.conv2(x_out)
         x_out = self.conv3(x_out)
-        if do_proj:
-            shortcut = self.conv4(x)
-        else:
-            shortcut = x
+        shortcut = self.conv4(x)
         return F.elu(self.normalize(x_out + shortcut), inplace=True)
 
 
@@ -101,7 +98,7 @@ class resconv_basic(nn.Module):
 
 
 def resblock(num_in_layers, num_out_layers, num_blocks, stride):
-    layers = []
+    layers = list()
     layers.append(resconv(num_in_layers, num_out_layers, stride))
     for i in range(1, num_blocks - 1):
         layers.append(resconv(4 * num_out_layers, num_out_layers, 1))
@@ -110,7 +107,7 @@ def resblock(num_in_layers, num_out_layers, num_blocks, stride):
 
 
 def resblock_basic(num_in_layers, num_out_layers, num_blocks, stride):
-    layers = []
+    layers = list()
     layers.append(resconv_basic(num_in_layers, num_out_layers, stride))
     for i in range(1, num_blocks):
         layers.append(resconv_basic(num_out_layers, num_out_layers, 1))

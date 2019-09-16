@@ -175,7 +175,7 @@ class Model:
         )
 
         if "cuda" in self.device:
-            torch.cuda.synchronize()
+            torch.cuda.synchronize(self.device)
 
     def train(self):
         losses = []
@@ -346,8 +346,8 @@ class Model:
         print("Finished Testing")
 
 
-def main(args):
-    args = return_arguments()
+def main(args=None):
+    args = args or return_arguments()
     if args.mode == "train":
         model = Model(args)
         model.train()
