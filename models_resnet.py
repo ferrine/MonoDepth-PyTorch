@@ -216,9 +216,9 @@ class Resnet50_md(nn.Module):
         upconv3 = self.upconv3(iconv4)
         concat3 = torch.cat((upconv3, skip2, self.udisp4), 1)
         iconv3 = self.iconv3(concat3)
-        self.disp3 = self.disp3_layer(iconv3)
+        disp3 = self.disp3_layer(iconv3)
         self.udisp3 = nn.functional.interpolate(
-            self.disp3, scale_factor=2, mode="bilinear", align_corners=True
+            disp3, scale_factor=2, mode="bilinear", align_corners=True
         )
 
         upconv2 = self.upconv2(iconv3)
@@ -233,7 +233,7 @@ class Resnet50_md(nn.Module):
         concat1 = torch.cat((upconv1, self.udisp2), 1)
         iconv1 = self.iconv1(concat1)
         self.disp1 = self.disp1_layer(iconv1)
-        return self.disp1, self.disp2, self.disp3, self.disp4
+        return self.disp1, self.disp2, disp3, self.disp4
 
 
 class Resnet18_md(nn.Module):
@@ -302,32 +302,32 @@ class Resnet18_md(nn.Module):
         upconv4 = self.upconv4(iconv5)
         concat4 = torch.cat((upconv4, skip3), 1)
         iconv4 = self.iconv4(concat4)
-        self.disp4 = self.disp4_layer(iconv4)
-        self.udisp4 = nn.functional.interpolate(
+        disp4 = self.disp4_layer(iconv4)
+        udisp4 = nn.functional.interpolate(
             self.disp4, scale_factor=2, mode="bilinear", align_corners=True
         )
 
         upconv3 = self.upconv3(iconv4)
-        concat3 = torch.cat((upconv3, skip2, self.udisp4), 1)
+        concat3 = torch.cat((upconv3, skip2, udisp4), 1)
         iconv3 = self.iconv3(concat3)
-        self.disp3 = self.disp3_layer(iconv3)
-        self.udisp3 = nn.functional.interpolate(
-            self.disp3, scale_factor=2, mode="bilinear", align_corners=True
+        disp3 = self.disp3_layer(iconv3)
+        udisp3 = nn.functional.interpolate(
+            disp3, scale_factor=2, mode="bilinear", align_corners=True
         )
 
         upconv2 = self.upconv2(iconv3)
-        concat2 = torch.cat((upconv2, skip1, self.udisp3), 1)
+        concat2 = torch.cat((upconv2, skip1, udisp3), 1)
         iconv2 = self.iconv2(concat2)
-        self.disp2 = self.disp2_layer(iconv2)
-        self.udisp2 = nn.functional.interpolate(
-            self.disp2, scale_factor=2, mode="bilinear", align_corners=True
+        disp2 = self.disp2_layer(iconv2)
+        udisp2 = nn.functional.interpolate(
+            disp2, scale_factor=2, mode="bilinear", align_corners=True
         )
 
         upconv1 = self.upconv1(iconv2)
-        concat1 = torch.cat((upconv1, self.udisp2), 1)
+        concat1 = torch.cat((upconv1, udisp2), 1)
         iconv1 = self.iconv1(concat1)
-        self.disp1 = self.disp1_layer(iconv1)
-        return self.disp1, self.disp2, self.disp3, self.disp4
+        disp1 = self.disp1_layer(iconv1)
+        return disp1, disp2, disp3, disp4
 
 
 def class_for_name(module_name, class_name):
@@ -429,32 +429,32 @@ class ResnetModel(nn.Module):
         upconv4 = self.upconv4(iconv5)
         concat4 = torch.cat((upconv4, skip3), 1)
         iconv4 = self.iconv4(concat4)
-        self.disp4 = self.disp4_layer(iconv4)
-        self.udisp4 = nn.functional.interpolate(
-            self.disp4, scale_factor=1, mode="bilinear", align_corners=True
+        disp4 = self.disp4_layer(iconv4)
+        udisp4 = nn.functional.interpolate(
+            disp4, scale_factor=1, mode="bilinear", align_corners=True
         )
-        self.disp4 = nn.functional.interpolate(
-            self.disp4, scale_factor=0.5, mode="bilinear", align_corners=True
+        disp4 = nn.functional.interpolate(
+            disp4, scale_factor=0.5, mode="bilinear", align_corners=True
         )
 
         upconv3 = self.upconv3(iconv4)
-        concat3 = torch.cat((upconv3, skip2, self.udisp4), 1)
+        concat3 = torch.cat((upconv3, skip2, udisp4), 1)
         iconv3 = self.iconv3(concat3)
-        self.disp3 = self.disp3_layer(iconv3)
-        self.udisp3 = nn.functional.interpolate(
-            self.disp3, scale_factor=2, mode="bilinear", align_corners=True
+        disp3 = self.disp3_layer(iconv3)
+        udisp3 = nn.functional.interpolate(
+            disp3, scale_factor=2, mode="bilinear", align_corners=True
         )
 
         upconv2 = self.upconv2(iconv3)
-        concat2 = torch.cat((upconv2, skip1, self.udisp3), 1)
+        concat2 = torch.cat((upconv2, skip1, udisp3), 1)
         iconv2 = self.iconv2(concat2)
-        self.disp2 = self.disp2_layer(iconv2)
-        self.udisp2 = nn.functional.interpolate(
-            self.disp2, scale_factor=2, mode="bilinear", align_corners=True
+        disp2 = self.disp2_layer(iconv2)
+        udisp2 = nn.functional.interpolate(
+            disp2, scale_factor=2, mode="bilinear", align_corners=True
         )
 
         upconv1 = self.upconv1(iconv2)
-        concat1 = torch.cat((upconv1, self.udisp2), 1)
+        concat1 = torch.cat((upconv1, udisp2), 1)
         iconv1 = self.iconv1(concat1)
-        self.disp1 = self.disp1_layer(iconv1)
-        return self.disp1, self.disp2, self.disp3, self.disp4
+        disp1 = self.disp1_layer(iconv1)
+        return disp1, disp2, disp3, disp4
