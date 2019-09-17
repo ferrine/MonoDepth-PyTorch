@@ -21,22 +21,22 @@ def return_arguments():
     parser = argparse.ArgumentParser(description="PyTorch Monodepth")
 
     parser.add_argument(
-        "data_dir",
+        "--data_dir",
         help='path to the dataset folder. \
                         It should contain subfolders with following structure:\
                         "image_02/data" for left images and \
                         "image_03/data" for right images',
     )
     parser.add_argument(
-        "val_data_dir",
+        "--val_data_dir",
         help='path to the validation dataset folder. \
                             It should contain subfolders with following structure:\
                             "image_02/data" for left images and \
                             "image_03/data" for right images',
     )
-    parser.add_argument("model_path", help="path to the trained model")
+    parser.add_argument("--model_path", help="path to the trained model")
     parser.add_argument(
-        "output_directory",
+        "--output_directory",
         help="where save dispairities\
                         for tested images",
     )
@@ -51,20 +51,29 @@ def return_arguments():
         + "or torchvision version of any resnet model",
     )
     parser.add_argument(
-        "--pretrained", default=False, help="Use weights of pretrained model"
+        "--pretrained", type=int, default=False, help="Use weights of pretrained model"
     )
     parser.add_argument(
-        "--mode", default="train", help="mode: train or test (default: train)"
+        "--mode",
+        default="train",
+        choices=("train", "test"),
+        help="mode: train or test (default: train)",
     )
-    parser.add_argument("--epochs", default=50, help="number of total epochs to run")
     parser.add_argument(
-        "--learning_rate", default=1e-4, help="initial learning rate (default: 1e-4)"
+        "--epochs", type=int, default=50, help="number of total epochs to run"
     )
     parser.add_argument(
-        "--batch_size", default=256, help="mini-batch size (default: 256)"
+        "--learning_rate",
+        type=float,
+        default=1e-4,
+        help="initial learning rate (default: 1e-4)",
+    )
+    parser.add_argument(
+        "--batch_size", type=int, default=256, help="mini-batch size (default: 256)"
     )
     parser.add_argument(
         "--adjust_lr",
+        type=int,
         default=True,
         help="apply learning rate decay or not\
                         (default: True)",
@@ -73,31 +82,39 @@ def return_arguments():
         "--device", default="cuda:0", help='choose cpu or cuda:0 device"'
     )
     parser.add_argument(
-        "--do_augmentation", default=True, help="do augmentation of images or not"
+        "--do_augmentation",
+        type=int,
+        default=True,
+        help="do augmentation of images or not",
     )
     parser.add_argument(
         "--augment_parameters",
+        type=lambda arr: list(map(float, arr.split(","))),
         default=[0.8, 1.2, 0.5, 2.0, 0.8, 1.2],
         help="lowest and highest values for gamma,\
                         brightness and color respectively",
     )
     parser.add_argument(
         "--print_images",
+        type=int,
         default=False,
         help="print disparity and image\
                         generated from disparity on every iteration",
     )
     parser.add_argument(
-        "--print_weights", default=False, help="print weights of every layer"
+        "--print_weights", type=int, default=False, help="print weights of every layer"
     )
     parser.add_argument(
-        "--input_channels", default=3, help="Number of channels in input tensor"
+        "--input_channels",
+        type=int,
+        default=3,
+        help="Number of channels in input tensor",
     )
     parser.add_argument(
-        "--num_workers", default=4, help="Number of workers in dataloader"
+        "--num_workers", type=int, default=4, help="Number of workers in dataloader"
     )
-    parser.add_argument("--use_multiple_gpu", default=False)
-    parser.add_argument("--stereo_labels", nargs="+", default=(True, False))
+    parser.add_argument("--use_multiple_gpu", type=int, default=False)
+    parser.add_argument("--stereo_labels", nargs="+", type=int, default=(True, False))
     args = parser.parse_args()
     return args
 
@@ -153,6 +170,7 @@ class Model:
                 args.batch_size,
                 (args.input_height, args.input_width),
                 args.num_workers,
+                labels=args.stereo_labels,
             )
         else:
             self.model.load_state_dict(torch.load(args.model_path))

@@ -43,8 +43,8 @@ class OrthancData(Dataset):
     def __init__(self, roor_dir, mode, transform=None, labels=(False, True)):
         import orthanc
 
-        reader = orthanc.dataset.HDF5StereoReader(roor_dir, 1, num_frames=None)
-        indices = np.full_like(False, reader.labels)
+        reader = orthanc.dataset.HDF5StereoReader(roor_dir, 1, num_frames=1)
+        indices = np.full_like(reader.labels, False)
         for label in labels:
             indices |= reader.labels == label
         pos, = indices.nonzero()
@@ -53,7 +53,12 @@ class OrthancData(Dataset):
         self.reader = Subset(reader, pos)
 
     def __getitem__(self, item):
-        (left_image, right_image), _ = self.reader[item]
+        stereo, _ = self.reader[item]
+        left_image, right_image = stereo[0]
+        left_image, right_image = (
+            Image.fromarray(left_image),
+            Image.fromarray(right_image),
+        )
         if self.mode == "train":
             sample = {"left_image": left_image, "right_image": right_image}
 
