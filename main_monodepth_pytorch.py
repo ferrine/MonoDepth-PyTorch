@@ -97,6 +97,7 @@ def return_arguments():
         "--num_workers", default=4, help="Number of workers in dataloader"
     )
     parser.add_argument("--use_multiple_gpu", default=False)
+    parser.add_argument("--stereo_labels", nargs="+", default=(True, False))
     args = parser.parse_args()
     return args
 
@@ -105,7 +106,7 @@ def adjust_learning_rate(optimizer, epoch, learning_rate):
     """Sets the learning rate to the initial LR\
         decayed by 2 every 10 epochs after 30 epoches"""
 
-    if epoch >= 30 and epoch < 40:
+    if (epoch >= 30) and (epoch < 40):
         lr = learning_rate / 2
     elif epoch >= 40:
         lr = learning_rate / 4
@@ -172,6 +173,7 @@ class Model:
             args.batch_size,
             (args.input_height, args.input_width),
             args.num_workers,
+            labels=args.stereo_labels,
         )
 
         if "cuda" in self.device:

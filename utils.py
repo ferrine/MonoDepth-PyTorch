@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader, ConcatDataset
 
 
 from models_resnet import Resnet18_md, Resnet50_md, ResnetModel
-from data_loader import KittiLoader
+from data_loader import KittiLoader, OrthancData
 from transforms import image_transforms
 
 
@@ -33,6 +33,61 @@ def get_model(model, input_channels=3, pretrained=False):
 
 
 def prepare_dataloader(
+    data_directory,
+    mode,
+    augment_parameters,
+    do_augmentation,
+    batch_size,
+    size,
+    num_workers,
+    labels=(True, False),
+):
+    if data_directory.endswith(".h5"):
+        return prepare_dataloader_orthanchdf5(**locals())
+    else:  # assume KITTY
+        return prepare_dataloader_kitty(**locals())
+
+
+def prepare_dataloader_orthanchdf5(
+    data_directory,
+    mode,
+    augment_parameters,
+    do_augmentation,
+    batch_size,
+    size,
+    num_workers,
+    labels=(True, False),
+):
+    data_transform = image_transforms(
+        mode=mode,
+        augment_parameters=augment_parameters,
+        do_augmentation=do_augmentation,
+        size=size,
+    )
+    dataset = OrthancData(
+        data_directory, mode=mode, transform=data_transform, labels=labels
+    )
+
+    if mode == "train":
+        loader = DataLoader(
+            dataset,
+            batch_size=batch_size,
+            shuffle=True,
+            num_workers=num_workers,
+            pin_memory=True,
+        )
+    else:
+        loader = DataLoader(
+            dataset,
+            batch_size=batch_size,
+            shuffle=False,
+            num_workers=num_workers,
+            pin_memory=True,
+        )
+    return len(dataset), loader
+
+
+def prepare_dataloader_kitty(
     data_directory,
     mode,
     augment_parameters,

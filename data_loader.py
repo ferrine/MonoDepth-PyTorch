@@ -42,6 +42,7 @@ class KittiLoader(Dataset):
 class OrthancData(Dataset):
     def __init__(self, roor_dir, mode, transform=None, labels=(False, True)):
         import orthanc
+
         reader = orthanc.dataset.HDF5StereoReader(roor_dir, 1, num_frames=None)
         indices = np.full_like(False, reader.labels)
         for label in labels:
