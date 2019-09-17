@@ -39,15 +39,33 @@ class KittiLoader(Dataset):
             return left_image
 
 
+def split(labels, fraction=0.8):
+    real, = np.where(labels)
+    fake, = np.where(~labels)
+    s_real = int(len(real) * fraction)
+    s_fake = int(len(fake) * fraction)
+    train, valid = (
+        np.concatenate([real[:s_real], fake[:s_fake]]),
+        np.concatenate([real[s_real:], fake[s_fake:]]),
+    )
+    return np.sort(train), np.sort(valid)
+
+
 class OrthancData(Dataset):
     def __init__(self, roor_dir, mode, transform=None, labels=(False, True)):
         import orthanc
 
         reader = orthanc.dataset.HDF5StereoReader(roor_dir, 1, num_frames=1)
+        train, test = split(reader.labels)
         indices = np.full_like(reader.labels, False)
         for label in labels:
             indices |= reader.labels == label
+        if mode == "train":
+            indices &= np.isin(np.arange(len(indices)), train)
+        else:
+            indices &= np.isin(np.arange(len(indices)), test)
         pos, = indices.nonzero()
+
         self.mode = mode
         self.transform = transform
         self.reader = Subset(reader, pos)
