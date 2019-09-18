@@ -34,11 +34,11 @@ def return_arguments():
                             "image_02/data" for left images and \
                             "image_03/data" for right images',
     )
-    parser.add_argument("--model_path", help="path to the trained model")
+    parser.add_argument("--model_path", help="path to the trained model", required=True)
     parser.add_argument(
         "--output_directory",
         help="where save dispairities\
-                        for tested images",
+                        for tested images", required=True,
     )
     parser.add_argument("--input_height", type=int, help="input height", default=256)
     parser.add_argument("--input_width", type=int, help="input width", default=512)
